@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Pengguna {
+  id_pengguna Int       @id @default(autoincrement())
+  nama        String    @db.VarChar(100)
+  email       String    @unique @db.VarChar(100)
+  password    String    @db.VarChar(255)
+  role        Role      @default(admin)
+  created_at  DateTime  @default(now())
+
+  produk      Produk[]
+  transaksi   Transaksi[]
+
+  @@map("tb_pengguna")
+}
+
+enum Role {
+  admin
+  superadmin
+}
+
+model Produk {
+  id_produk         Int              @id @default(autoincrement())
+  sku               String           @unique @db.VarChar(20)
+  nama_produk       String           @db.VarChar(200)
+  jenis_kulit       JenisKulit
+  asal_material     String           @db.VarChar(200)
+  teknik_penyamakan TeknikPenyamakan
+  warna             String           @db.VarChar(100)
+  harga             Decimal          @db.Decimal(12, 2)
+  qr_code_url       String?          @db.VarChar(500)
+  is_active         Boolean          @default(true)
+  id_pengguna       Int
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+
+  pengguna          Pengguna         @relation(fields: [id_pengguna], references: [id_pengguna])
+  user_story        UserStory?
+  persediaan        Persediaan[]
+  transaksi         Transaksi[]
+  scan_log          ScanLog[]
+
+  @@map("tb_produk")
+}
+
+enum JenisKulit {
+  Domba
+  Sapi
+  Kerbau
+}
+
+enum TeknikPenyamakan {
+  Vegetable
+  Chrome
+}
+
+model Pengrajin {
+  id_pengrajin     Int         @id @default(autoincrement())
+  nama_pengrajin   String      @db.VarChar(100)
+  nama_bengkel     String      @db.VarChar(200)
+  tahun_pengalaman Int
+  spesialisasi     String      @db.VarChar(200)
+  filosofi_desain  String      @db.Text
+  foto_url         String?     @db.VarChar(500)
+  lokasi           String      @db.VarChar(200)
+
+  user_story       UserStory[]
+
+  @@map("tb_pengrajin")
+}
+
+model UserStory {
+  id_story         Int       @id @default(autoincrement())
+  id_produk        Int       @unique
+  id_pengrajin     Int
+  deskripsi_produk String    @db.Text
+  narasi_budaya    String    @db.Text
+  tips_perawatan   String    @db.Text
+  is_published     Boolean   @default(false)
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  produk           Produk    @relation(fields: [id_produk], references: [id_produk])
+  pengrajin        Pengrajin @relation(fields: [id_pengrajin], references: [id_pengrajin])
+
+  @@map("tb_user_story")
+}
+
+model Persediaan {
+  id_persediaan  Int      @id @default(autoincrement())
+  id_produk      Int
+  stok_masuk     Int      @default(0)
+  stok_keluar    Int      @default(0)
+  tanggal_update DateTime @default(now())
+  keterangan     String?  @db.VarChar(255)
+
+  produk         Produk   @relation(fields: [id_produk], references: [id_produk])
+
+  @@map("tb_persediaan")
+}
+
+model Transaksi {
+  id_transaksi      Int      @id @default(autoincrement())
+  kode_transaksi    String   @unique @db.VarChar(50)
+  id_produk         Int
+  id_pengguna       Int
+  jumlah            Int
+  harga_satuan      Decimal  @db.Decimal(12, 2)
+  total_harga       Decimal  @db.Decimal(12, 2)
+  tanggal_transaksi DateTime @default(now())
+  keterangan        String?  @db.Text
+
+  produk            Produk   @relation(fields: [id_produk], references: [id_produk])
+  pengguna          Pengguna @relation(fields: [id_pengguna], references: [id_pengguna])
+
+  @@map("tb_transaksi")
+}
+
+model ScanLog {
+  id_scan      Int      @id @default(autoincrement())
+  id_produk    Int
+  ip_address   String   @db.VarChar(50)
+  user_agent   String   @db.Text
+  tanggal_scan DateTime @default(now())
+
+  produk       Produk   @relation(fields: [id_produk], references: [id_produk])
+
+  @@map("tb_scan_log")
+}

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: smis-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: smis_bellene
+      MYSQL_USER: smis_user
+      MYSQL_PASSWORD: smis_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - smis_mysql_data:/var/lib/mysql
+
+volumes:
+  smis_mysql_data:
