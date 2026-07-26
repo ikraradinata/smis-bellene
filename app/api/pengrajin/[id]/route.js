@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 // PUT - Update pengrajin
 export async function PUT(request, { params }) {
+  const { id } = await params
+  const proxied = await proxyToRemoteIfConfigured(request, `/api/pengrajin/${id}`)
+  if (proxied) return proxied
   try {
     const { id } = await params
     const id_pengrajin = Number.parseInt(id, 10)
@@ -57,6 +61,9 @@ export async function PUT(request, { params }) {
 
 // DELETE - Hapus pengrajin
 export async function DELETE(request, { params }) {
+  const { id } = await params
+  const proxied = await proxyToRemoteIfConfigured(request, `/api/pengrajin/${id}`)
+  if (proxied) return proxied
   try {
     const { id } = await params
     const id_pengrajin = Number.parseInt(id, 10)

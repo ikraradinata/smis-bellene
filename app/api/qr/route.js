@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import QRCode from 'qrcode'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 export async function POST(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/qr')
+  if (proxied) return proxied
   const { sku } = await request.json()
 
   if (!sku) {

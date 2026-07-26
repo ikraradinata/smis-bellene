@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 export async function GET(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, `/api/laporan${new URL(request.url).search}`)
+  if (proxied) return proxied
   const { searchParams } = new URL(request.url)
   const from = searchParams.get('from')
   const to   = searchParams.get('to')

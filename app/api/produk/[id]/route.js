@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 // PUT - Update produk
 export async function PUT(request, { params }) {
+  const { id } = await params
+  const proxied = await proxyToRemoteIfConfigured(request, `/api/produk/${id}`)
+  if (proxied) return proxied
   try {
     const { id } = await params
     const id_produk = Number.parseInt(id, 10)
@@ -33,6 +37,9 @@ export async function PUT(request, { params }) {
 
 // DELETE - Soft delete produk
 export async function DELETE(request, { params }) {
+  const { id } = await params
+  const proxied = await proxyToRemoteIfConfigured(request, `/api/produk/${id}`)
+  if (proxied) return proxied
   try {
     const { id } = await params
     const id_produk = Number.parseInt(id, 10)

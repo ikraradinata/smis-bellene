@@ -1,8 +1,11 @@
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
-export async function GET() {
+export async function GET(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/dashboard')
+  if (proxied) return proxied
   const session = await getServerSession()
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

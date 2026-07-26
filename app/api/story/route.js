@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 // GET - Ambil story berdasarkan SKU
 export async function GET(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, `/api/story${new URL(request.url).search}`)
+  if (proxied) return proxied
   const { searchParams } = new URL(request.url)
   const sku = searchParams.get('sku')
 
@@ -23,6 +26,8 @@ export async function GET(request) {
 
 // PUT - Update story
 export async function PUT(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/story')
+  if (proxied) return proxied
   const body = await request.json()
   const { id_story, id_pengrajin, deskripsi_produk, narasi_budaya, tips_perawatan, is_published } = body
 
