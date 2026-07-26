@@ -6,10 +6,6 @@ import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 export async function GET(request) {
   const proxied = await proxyToRemoteIfConfigured(request, '/api/dashboard')
   if (proxied) return proxied
-  const session = await getServerSession()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
 
   // Total produk aktif
   const totalProduk = await prisma.produk.count({
