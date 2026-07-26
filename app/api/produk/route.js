@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hardDeleteProdukById } from '@/lib/hardDeleteProduk'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 // GET - Ambil semua produk
-export async function GET() {
+export async function GET(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/produk')
+  if (proxied) return proxied
+
   const produk = await prisma.produk.findMany({
     where: { is_active: true },
     include: {
@@ -28,6 +32,8 @@ export async function GET() {
 
 // POST - Tambah produk baru
 export async function POST(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/produk')
+  if (proxied) return proxied
   const body = await request.json()
   const sku = String(body.sku ?? '').trim()
   const { nama_produk, jenis_kulit, asal_material, teknik_penyamakan, warna, harga } = body

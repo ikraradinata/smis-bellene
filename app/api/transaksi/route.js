@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 // GET - Ambil semua transaksi
 export async function GET(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, `/api/transaksi${new URL(request.url).search}`)
+  if (proxied) return proxied
+
   const { searchParams } = new URL(request.url)
   const from = searchParams.get('from')
   const to = searchParams.get('to')
@@ -29,6 +33,9 @@ export async function GET(request) {
 
 // POST - Catat transaksi baru
 export async function POST(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/transaksi')
+  if (proxied) return proxied
+
   const body = await request.json()
   const { id_produk, jumlah, harga_satuan, keterangan } = body
 

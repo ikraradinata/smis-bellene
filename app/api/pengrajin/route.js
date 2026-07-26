@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 // GET - Ambil semua pengrajin
-export async function GET() {
+export async function GET(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/pengrajin')
+  if (proxied) return proxied
+
   const pengrajin = await prisma.pengrajin.findMany({
     include: {
       _count: { select: { user_story: true } },
@@ -21,6 +25,8 @@ export async function GET() {
 
 // POST - Tambah pengrajin baru
 export async function POST(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/pengrajin')
+  if (proxied) return proxied
   try {
     const body = await request.json()
     const {

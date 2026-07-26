@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { proxyToRemoteIfConfigured } from '@/lib/apiProxy'
 
 // GET - Rekap stok semua produk
-export async function GET() {
+export async function GET(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/persediaan')
+  if (proxied) return proxied
+
   const produk = await prisma.produk.findMany({
     where: { is_active: true },
     include: { persediaan: true },
@@ -35,6 +39,8 @@ export async function GET() {
 
 // POST - Input mutasi stok
 export async function POST(request) {
+  const proxied = await proxyToRemoteIfConfigured(request, '/api/persediaan')
+  if (proxied) return proxied
   const body = await request.json()
   const { id_produk, jenis_mutasi, jumlah, keterangan } = body
 
