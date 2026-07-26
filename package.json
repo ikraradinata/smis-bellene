@@ -8,7 +8,12 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "seed": "node prisma/seed.js",
+    "db:reset-local": "node scripts/db-reset-local.mjs",
+    "db:sync-prod": "node scripts/db-sync-from-prod.mjs",
     "db:cleanup-inactive": "node prisma/cleanup-inactive-produk.mjs"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

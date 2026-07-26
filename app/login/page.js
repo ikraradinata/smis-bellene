@@ -16,18 +16,33 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
 
-    setLoading(false)
+      if (result?.error) {
+        if (result.error === 'Configuration') {
+          setError('Server belum dikonfigurasi dengan benar (NEXTAUTH_SECRET / NEXTAUTH_URL).')
+        } else {
+          setError('Email atau password salah. Silakan coba lagi.')
+        }
+        return
+      }
 
-    if (result?.error) {
-      setError('Email atau password salah. Silakan coba lagi.')
-    } else {
+      if (!result?.ok) {
+        setError('Login gagal. Periksa koneksi atau coba lagi.')
+        return
+      }
+
       router.push('/admin/dashboard')
+      router.refresh()
+    } catch {
+      setError('Tidak dapat terhubung ke server. Silakan coba lagi.')
+    } finally {
+      setLoading(false)
     }
   }
 
